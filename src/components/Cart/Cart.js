@@ -4,6 +4,7 @@ import CartItem from './CartItem';
 import Modal from '../UI/Modal';
 import classes from './Cart.module.css';
 import Checkout from './Checkout';
+import { firebaseConfig } from '../../firebase';
 
 const Cart = props => {
   const [isCheckout, setIsCheckout] = useState(false);
@@ -20,8 +21,18 @@ const Cart = props => {
     cartCtx.removeItem(id);
   };
 
-  const handleOrder = () => {
+  const OrderHandler = () => {
     setIsCheckout(true);
+  };
+
+  const submitOrderHandler = (userData) => {
+    fetch(`${firebaseConfig.databaseURL}/orders.json`, {
+      method: 'POST',
+      body: JSON.stringify({
+        user: userData,
+        orderedItems: cartCtx.items
+      })
+    });
   };
 
   const cartItems = (
@@ -41,7 +52,7 @@ const Cart = props => {
 
   const modalActions = <div className={classes.actions}>
   <button className={classes['button--alt']} onClick={props.onClose}>Close</button>
-  {hasItems && <button className={classes.button} onClick={handleOrder}>Order</button>}
+  {hasItems && <button className={classes.button} onClick={OrderHandler}>Order</button>}
 </div>
 
   return (
@@ -51,7 +62,7 @@ const Cart = props => {
         <span>Total Amount</span>
         <span>{totalAmount}</span>
       </div>
-      {isCheckout && <Checkout onCancel={props.onClose} />}
+      {isCheckout && <Checkout onConfirm={submitOrderHandler} onCancel={props.onClose} />}
       {!isCheckout && modalActions}
     </Modal>
   );
