@@ -6,9 +6,11 @@ import { firebaseConfig } from '../../firebase';
 
 const AvailableMeals = () => {
   const [meals, setMeals] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     const fetchMeals = async () => {
+      setIsLoading(true);
       const response = await fetch(`${firebaseConfig.databaseURL}/meals.json`);
       const responseData = await response.json();
       console.log(response);
@@ -25,10 +27,17 @@ const AvailableMeals = () => {
       }
 
       setMeals(loadedMeals);
+      setIsLoading(false);
     };
 
     fetchMeals();
   }, []);
+
+  if (isLoading) {
+    return <section className={classes.MealsLoading}>
+      <p>Loading...</p>
+    </section>
+  }
 
   const mealsList = meals.map(meal => 
       <MealItem
