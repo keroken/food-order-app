@@ -7,11 +7,17 @@ import { firebaseConfig } from '../../firebase';
 const AvailableMeals = () => {
   const [meals, setMeals] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [httpError, setHttpError] = useState();
 
   useEffect(() => {
     const fetchMeals = async () => {
       setIsLoading(true);
       const response = await fetch(`${firebaseConfig.databaseURL}/meals.json`);
+
+      if (!response.ok) {
+        throw new Error('Something went wrong...');
+      }
+
       const responseData = await response.json();
       console.log(response);
 
@@ -30,12 +36,23 @@ const AvailableMeals = () => {
       setIsLoading(false);
     };
 
-    fetchMeals();
+      fetchMeals().catch((error) => {
+        setIsLoading(false);
+        setHttpError(error.message);
+      });
+      
+    
   }, []);
 
   if (isLoading) {
     return <section className={classes.MealsLoading}>
       <p>Loading...</p>
+    </section>
+  }
+
+  if (httpError) {
+    return <section className={classes.MealsError}>
+      <p>{httpError}</p>
     </section>
   }
 
